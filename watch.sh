@@ -1,0 +1,1 @@
+nodemon --watch src -e hx,hxml,xml --exec haxe --times --connect 7015 build.hxml
