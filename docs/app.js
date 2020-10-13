@@ -77,10 +77,34 @@ Main.main = function() {
 	Game.s = new MyScene();
 };
 var MyScene = function() {
+	this.ball = { x : 64, y : 64, width : 2, height : 2};
+	this.blocks = [];
 	this.paddle = { x : 64, y : 120, width : 10, height : 1};
+	this.createBlocks();
 };
 MyScene.prototype = {
-	update: function() {
+	createBlocks: function() {
+		var rowColor = "red";
+		var _g = 0;
+		while(_g < 3) {
+			var y = _g++;
+			switch(y) {
+			case 0:
+				rowColor = "red";
+				break;
+			case 1:
+				rowColor = "blue";
+				break;
+			case 2:
+				rowColor = "purple";
+				break;
+			default:
+			}
+			var _g1 = 0;
+			while(_g1 < 32) this.blocks.push({ x : 4 * _g1++, y : 4 * y, width : 4, height : 4, color : rowColor});
+		}
+	}
+	,update: function() {
 		if(Controls.p(37)) {
 			this.paddle.x -= 1;
 		}
@@ -90,7 +114,21 @@ MyScene.prototype = {
 	}
 	,draw: function() {
 		DrawTools.clr();
+		this.drawBlocks();
+		this.drawBall();
 		this.drawPaddle();
+	}
+	,drawBlocks: function() {
+		var _g = 0;
+		var _g1 = this.blocks;
+		while(_g < _g1.length) {
+			var block = _g1[_g];
+			++_g;
+			DrawTools.frect(block.color,block.x,block.y,block.width,block.height);
+		}
+	}
+	,drawBall: function() {
+		DrawTools.frect("lightBlue",this.ball.x,this.ball.y,this.ball.width,this.ball.height);
 	}
 	,drawPaddle: function() {
 		DrawTools.frect("red",this.paddle.x,this.paddle.y,this.paddle.width,this.paddle.height);

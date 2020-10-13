@@ -8,3 +8,8 @@ typedef Rect = {
 	var width:Int;
 	var height:Int;
 }
+
+typedef Block = {
+	> Rect,
+	var color:String;
+}
