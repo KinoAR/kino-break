@@ -2,6 +2,8 @@ import Types.Block;
 import Types.Rect;
 import Types.Point;
 
+using NumExtensions;
+
 // Screen Size is 128 x 128
 class MyScene implements Scene {
 	public var paddle:Rect = {
@@ -13,21 +15,30 @@ class MyScene implements Scene {
 
 	public var blocks:Array<Block> = [];
 
-	public var ball:Rect = {
-		x: 64,
-		y: 64,
-		width: 2,
-		height: 2
+	public var ball = {
+		rect: {
+			x: 64,
+			y: 64,
+			width: 2,
+			height: 2
+		},
+		body: {
+			velocity: {x: 0, y: 0},
+			speed: 3
+		}
 	}
 
 	public function new() {
 		createBlocks();
+		// Setup Ball
+		var ballGravity = 1;
+		ball.body.velocity.y = ballGravity;
 	}
 
 	public function createBlocks() {
 		var screenWidth = 128;
 		var screenHeight = 128;
-		var blockSize = 4;
+		var blockSize = 2;
 		var blockRowX = (screenWidth / blockSize).floor();
 		var numBlockRows = 3;
 		var rowColor = 'red';
@@ -48,13 +59,20 @@ class MyScene implements Scene {
 					y: blockSize * y,
 					width: blockSize,
 					height: blockSize,
-					color: rowColor
+					color: rowColor,
+					alive: true
 				});
 			}
 		}
 	}
 
 	public function update() {
+		updateControls();
+		updateBallMovement();
+		updateCollisionDetection();
+	}
+
+	public function updateControls() {
 		if (Controls.p(Keys.LEFT)) {
 			paddle.x -= 1;
 		}
@@ -64,7 +82,82 @@ class MyScene implements Scene {
 		}
 	}
 
-	public function updateBallMovement() {}
+	public function updateBallMovement() {
+		// Clamp Velocity to prevent ball from going outside zone
+		ball.body.velocity.y = cast ball.body.velocity.y.clamp(-50, 50);
+		ball.rect.y += ball.body.velocity.y;
+		ball.rect.x += ball.body.velocity.x;
+	}
+
+	public function updateCollisionDetection() {
+		// Handle ball collision with paddle
+		if (isCollided(ball.rect, paddle)) {
+			trace('Collided with paddle');
+			// ball.rect.y = paddle.y - ball.rect.height;
+			var centerPaddleX = (paddle.x + paddle.width / 2);
+			if (ball.rect.x < centerPaddleX) {
+				ball.body.velocity.x = 1;
+			}
+
+			if (ball.rect.x > centerPaddleX) {
+				ball.body.velocity.x = -1;
+			}
+			ball.body.velocity.y *= -1;
+			ball.body.velocity.x *= -1;
+		}
+
+		handleWallCollisions();
+
+		// Handle Block Collision
+		for (block in blocks) {
+			if (isCollided(ball.rect, block) && block.alive) {
+				trace('Collided with block');
+				// ball.rect.y = paddle.y - ball.rect.height;
+				block.alive = false;
+				trace(block.x, block.y);
+				trace(ball.body.velocity.y);
+				ball.body.velocity.y *= -1;
+				trace(ball.body.velocity.y);
+				ball.body.velocity.x *= -1;
+			}
+		}
+	}
+
+	public function handleWallCollisions() {
+		// Handle Wall Collision
+		if (ball.rect.x < 0) {
+			ball.body.velocity.x *= -1;
+		}
+		if (ball.rect.x > 128) {
+			ball.body.velocity.x *= -1;
+		}
+		if (ball.rect.y < 0) {
+			ball.body.velocity.y *= -1;
+		}
+	}
+
+	public function isCollided(body:Rect, otherBody:Rect) {
+		var topRightCorner = {
+			x: body.x + body.width,
+			y: body.y,
+		};
+		var bottomRightCorner = {
+			x: body.x + body.width,
+			y: body.y + body.height
+		}
+		var bottomLeftCorner = {
+			x: body.x,
+			y: body.y + body.height
+		}
+		return (body.x.withinRangef(otherBody.x, otherBody.x + otherBody.width)
+			&& body.y.withinRangef(otherBody.y, otherBody.y + otherBody.height))
+			|| (bottomRightCorner.x.withinRangef(otherBody.x, otherBody.x + otherBody.width)
+				&& bottomRightCorner.y.withinRangef(otherBody.y, otherBody.y + otherBody.height))
+			|| (bottomLeftCorner.x.withinRangef(otherBody.x, otherBody.x + otherBody.width)
+				&& bottomLeftCorner.y.withinRangef(otherBody.y, otherBody.y + otherBody.height))
+			|| (bottomRightCorner.x.withinRangef(otherBody.x, otherBody.x + otherBody.width)
+				&& topRightCorner.y.withinRangef(otherBody.y, otherBody.y + otherBody.height));
+	}
 
 	public function draw() {
 		clr();
@@ -75,12 +168,16 @@ class MyScene implements Scene {
 
 	public function drawBlocks() {
 		for (block in blocks) {
-			frect(block.color, block.x, block.y, block.width, block.height);
+			if (block.alive) {
+				frect(block.color, block.x, block.y, block.width, block.height);
+				// rect('white', block.x, block.y, block.width, block.height);
+			}
 		}
 	}
 
 	public function drawBall() {
-		frect('lightBlue', ball.x, ball.y, ball.width, ball.height);
+		var ballRect = ball.rect;
+		frect('lightBlue', ballRect.x, ballRect.y, ballRect.width, ballRect.height);
 	}
 
 	public function drawPaddle() {

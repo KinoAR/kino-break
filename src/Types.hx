@@ -12,4 +12,10 @@ typedef Rect = {
 typedef Block = {
 	> Rect,
 	var color:String;
+	var alive:Bool;
+}
+
+typedef Body2D = {
+	var velocity:Point;
+	var speed:Int;
 }
