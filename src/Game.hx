@@ -3,7 +3,6 @@ import js.html.CanvasRenderingContext2D;
 
 @:expose('Game')
 class Game {
-	
 	// context for drawing - reference `CTX` globally
 	public static var ctx:CanvasRenderingContext2D;
 
@@ -30,7 +29,7 @@ class Game {
 	/**
 	 *	Starts the engine. Pass parent element's id, and desired width and height
 	**/
-	static function init(p:String,_w:Int,_h:Int) {
+	static function init(p:String, _w:Int, _h:Int) {
 		// Create container for framerate
 		#if show_framerate
 		fr_el = document.createDivElement();
@@ -45,43 +44,56 @@ class Game {
 		var c = document.createCanvasElement();
 		var el = document.getElementById(p);
 		el.appendChild(c);
-		
+
 		// Set width and height
 		w = c.width = _w;
 		h = c.height = _h;
-		
+
 		// Set the main canvas context
 		ctx = c.getContext2d();
-		
+
 		// Initialize controls
 		Controls.init();
-		
+
 		// Reset zoom variables on resize
 		window.onresize = (e) -> {
-			zx = el.offsetWidth/_w;
-			zy = el.offsetHeight/_h;
+			zx = el.offsetWidth / _w;
+			zy = el.offsetHeight / _h;
 		}
 		window.onresize();
-		
+
+		// // Handle Canvas Text Size
+
+		// untyped window.devicePixelRatio = 2;
+		// var size = 150;
+		// c.style.width = size + "px";
+		// c.style.height = size + "px";
+
+		// var scale = window.devicePixelRatio;
+
+		// c.width = Math.floor(size * scale);
+		// c.height = Math.floor(size * scale);
+		// ctx.scale(scale, scale);
+
 		// Start game loop
 		window.requestAnimationFrame(loop);
-		
+
 		// Start game
 		Main.main();
 	}
-	
+
 	// Our game loop
 	static function loop(e:Float) {
 		t = e;
 		s.update();
 		s.draw();
 		#if show_framerate
-		var fr = '${(10000/(e - last_time)).round()/10}';
-		if (fr.length < 4) fr += '.0';
+		var fr = '${(10000 / (e - last_time)).round() / 10}';
+		if (fr.length < 4)
+			fr += '.0';
 		fr_el.innerText = '$fr fps';
 		last_time = e;
 		#end
 		window.requestAnimationFrame(loop);
 	}
-	
 }

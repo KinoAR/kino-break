@@ -48,6 +48,11 @@ DrawTools.frect = function(col,x,y,w,h) {
 	Game.ctx.fillStyle = col;
 	Game.ctx.fillRect(x,y,w,h);
 };
+DrawTools.txt = function(col,text,x,y,maxWidth) {
+	Game.ctx.fillStyle = col;
+	Game.ctx.font = "10px Verdana";
+	Game.ctx.fillText(text,x,y,maxWidth);
+};
 var Game = $hx_exports["Game"] = function() { };
 Game.__name__ = true;
 Game.init = function(p,_w,_h) {
@@ -85,6 +90,7 @@ var MyScene = function() {
 	this.ball = { rect : { x : 64, y : 64, width : 2, height : 2}, body : { velocity : { x : 0, y : 0}, speed : 3}};
 	this.blocks = [];
 	this.paddle = { x : 64, y : 120, width : 10, height : 1};
+	this.score = 0;
 	this.createBlocks();
 	this.ball.body.velocity.y = 1;
 };
@@ -111,10 +117,22 @@ MyScene.prototype = {
 			while(_g1 < 64) this.blocks.push({ x : 2 * _g1++, y : 2 * y, width : 2, height : 2, color : rowColor, alive : true});
 		}
 	}
+	,incrementScore: function() {
+		this.score += 100;
+	}
+	,resetGame: function() {
+		Game.s = new MyScene();
+	}
 	,update: function() {
+		this.updateProcessGameState();
 		this.updateControls();
 		this.updateBallMovement();
 		this.updateCollisionDetection();
+	}
+	,updateProcessGameState: function() {
+		if(this.ball.rect.y > 128) {
+			this.resetGame();
+		}
 	}
 	,updateControls: function() {
 		if(Controls.p(37)) {
@@ -131,7 +149,7 @@ MyScene.prototype = {
 	}
 	,updateCollisionDetection: function() {
 		if(this.isCollided(this.ball.rect,this.paddle)) {
-			haxe_Log.trace("Collided with paddle",{ fileName : "src/MyScene.hx", lineNumber : 95, className : "MyScene", methodName : "updateCollisionDetection"});
+			haxe_Log.trace("Collided with paddle",{ fileName : "src/MyScene.hx", lineNumber : 111, className : "MyScene", methodName : "updateCollisionDetection"});
 			var centerPaddleX = this.paddle.x + this.paddle.width / 2;
 			if(this.ball.rect.x < centerPaddleX) {
 				this.ball.body.velocity.x = 1;
@@ -149,12 +167,13 @@ MyScene.prototype = {
 			var block = _g1[_g];
 			++_g;
 			if(this.isCollided(this.ball.rect,block) && block.alive) {
-				haxe_Log.trace("Collided with block",{ fileName : "src/MyScene.hx", lineNumber : 114, className : "MyScene", methodName : "updateCollisionDetection"});
+				haxe_Log.trace("Collided with block",{ fileName : "src/MyScene.hx", lineNumber : 130, className : "MyScene", methodName : "updateCollisionDetection"});
+				this.incrementScore();
 				block.alive = false;
-				haxe_Log.trace(block.x,{ fileName : "src/MyScene.hx", lineNumber : 117, className : "MyScene", methodName : "updateCollisionDetection", customParams : [block.y]});
-				haxe_Log.trace(this.ball.body.velocity.y,{ fileName : "src/MyScene.hx", lineNumber : 118, className : "MyScene", methodName : "updateCollisionDetection"});
+				haxe_Log.trace(block.x,{ fileName : "src/MyScene.hx", lineNumber : 134, className : "MyScene", methodName : "updateCollisionDetection", customParams : [block.y]});
+				haxe_Log.trace(this.ball.body.velocity.y,{ fileName : "src/MyScene.hx", lineNumber : 135, className : "MyScene", methodName : "updateCollisionDetection"});
 				this.ball.body.velocity.y *= -1;
-				haxe_Log.trace(this.ball.body.velocity.y,{ fileName : "src/MyScene.hx", lineNumber : 120, className : "MyScene", methodName : "updateCollisionDetection"});
+				haxe_Log.trace(this.ball.body.velocity.y,{ fileName : "src/MyScene.hx", lineNumber : 137, className : "MyScene", methodName : "updateCollisionDetection"});
 				this.ball.body.velocity.x *= -1;
 			}
 		}
@@ -225,6 +244,10 @@ MyScene.prototype = {
 		this.drawBlocks();
 		this.drawBall();
 		this.drawPaddle();
+		this.drawScore();
+	}
+	,drawScore: function() {
+		DrawTools.txt("white","Score: " + this.score,58,30);
 	}
 	,drawBlocks: function() {
 		var _g = 0;

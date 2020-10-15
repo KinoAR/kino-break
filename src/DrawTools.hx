@@ -1,5 +1,4 @@
 class DrawTools {
-	
 	/**
 	 *	Clear the canvas
 	**/
@@ -7,7 +6,8 @@ class DrawTools {
 		#if use_primatives
 		col != null ? frect(col, 0, 0, Game.w, Game.h) : CTX.clearRect(0, 0, Game.w, Game.h);
 		#else
-		if (col == null) CTX.clearRect(0, 0, Game.w, Game.h);
+		if (col == null)
+			CTX.clearRect(0, 0, Game.w, Game.h);
 		else {
 			CTX.fillStyle = col;
 			CTX.fillRect(0, 0, Game.w, Game.h);
@@ -32,7 +32,7 @@ class DrawTools {
 	public static function fcirc(col:String, x:Float, y:Float, r:Float) {
 		CTX.fillStyle = col;
 		CTX.beginPath();
-		CTX.arc(x,y,r,0,2*PI);
+		CTX.arc(x, y, r, 0, 2 * PI);
 		CTX.fill();
 	}
 
@@ -41,7 +41,7 @@ class DrawTools {
 	**/
 	public static function circ(col:String, x:Float, y:Float, r:Float, ?lw:Float) {
 		ls(col, lw);
-		CTX.arc(x,y,r,0,2*PI);
+		CTX.arc(x, y, r, 0, 2 * PI);
 		CTX.stroke();
 	}
 
@@ -50,7 +50,7 @@ class DrawTools {
 	**/
 	public static function frect(col:String, x:Float, y:Float, w:Float, h:Float) {
 		CTX.fillStyle = col;
-		CTX.fillRect(x,y,w,h);
+		CTX.fillRect(x, y, w, h);
 	}
 
 	/**
@@ -58,7 +58,20 @@ class DrawTools {
 	**/
 	public static function rect(col:String, x:Float, y:Float, w:Float, h:Float, ?lw:Float) {
 		ls(col, lw);
-		CTX.strokeRect(x,y,w,h);
+		CTX.strokeRect(x, y, w, h);
+	}
+
+	/**
+	 * Draw text in the Verdana font with  in the specified color.
+	 * @param text
+	 * @param x
+	 * @param y
+	 * @param maxWidth
+	 */
+	public static function txt(col:String, text:String, x:Float, y:Float, ?maxWidth:Float) {
+		CTX.fillStyle = col;
+		CTX.font = '10px Verdana';
+		CTX.fillText(text, x, y, maxWidth);
 	}
 
 	static function ls(col:String, ?lw:Float) {
@@ -67,7 +80,6 @@ class DrawTools {
 		CTX.beginPath();
 		return CTX;
 	}
-
 	#end
 
 	#if use_sprites
@@ -77,7 +89,18 @@ class DrawTools {
 	 *	Draw a sprite at coordinates x,y and a given id, offset, size, and options
 	 *	`ATTENTION`: make sure to use `Spr.l()` to load an image first!
 	**/
-	public static function spr(x:Float, y:Float, sprite:{id:Int, ox:Float, oy:Float, w:Float, h:Float}, ?options:{?a:Float,?sx:Float,?sy:Float,?r:Float}) {
+	public static function spr(x:Float, y:Float, sprite:{
+		id:Int,
+		ox:Float,
+		oy:Float,
+		w:Float,
+		h:Float
+	}, ?options:{
+		?a:Float,
+		?sx:Float,
+		?sy:Float,
+		?r:Float
+	}) {
 		options = {
 			a: options != null && options.a != null ? options.a : 1,
 			sx: options != null && options.sx != null ? options.sx : 1,
@@ -91,7 +114,7 @@ class DrawTools {
 		j_hat.a += options.r;
 		CTX.save();
 		CTX.transform(i_hat.x, j_hat.x, i_hat.y, j_hat.y, x, y);
-		CTX.transform(1,0,0,1,-offset.x,-offset.y);
+		CTX.transform(1, 0, 0, 1, -offset.x, -offset.y);
 		CTX.globalAlpha = options.a;
 		CTX.drawImage(Spr.m[sprite.id], sprite.ox, sprite.oy, sprite.w, sprite.h, 0, 0, sprite.w, sprite.h);
 		CTX.restore();
@@ -99,14 +122,18 @@ class DrawTools {
 		j_hat.put();
 		offset.put();
 	}
-	
-	/**
-	*	Draw an atlas frame with a given ID at coordinates x,y with options
-	**/
-	public static function atl(id:Int, x:Float, y:Float, ?options:{?a:Float,?sx:Float,?sy:Float,?r:Float}) {
-		spr(x,y,Spr.atl[id],options);
-	}
 
+	/**
+	 *	Draw an atlas frame with a given ID at coordinates x,y with options
+	**/
+	public static function atl(id:Int, x:Float, y:Float, ?options:{
+		?a:Float,
+		?sx:Float,
+		?sy:Float,
+		?r:Float
+	}) {
+		spr(x, y, Spr.atl[id], options);
+	}
 	#else
 
 	/**
@@ -116,7 +143,7 @@ class DrawTools {
 	public static function spr(id:Int, x:Float, y:Float, ox:Float, oy:Float, w:Float, h:Float) {
 		CTX.drawImage(Spr.m[id], ox, oy, w, h, x, y, w, h);
 	}
-	
+
 	/**
 	 *	Draw an atlas frame with a given ID at coordinates x,y
 	**/
@@ -124,9 +151,7 @@ class DrawTools {
 		var a = Spr.atl[id];
 		CTX.drawImage(Spr.m[a.id], a.ox, a.oy, a.w, a.h, x, y, a.w, a.h);
 	}
-
 	#end
 
 	#end
-
 }

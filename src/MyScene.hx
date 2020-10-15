@@ -6,6 +6,7 @@ using NumExtensions;
 
 // Screen Size is 128 x 128
 class MyScene implements Scene {
+	public var score:Int = 0;
 	public var paddle:Rect = {
 		x: 64,
 		y: 120,
@@ -66,10 +67,25 @@ class MyScene implements Scene {
 		}
 	}
 
+	public function incrementScore() {
+		score += 100;
+	}
+
+	public function resetGame() {
+		Game.s = new MyScene();
+	}
+
 	public function update() {
+		updateProcessGameState();
 		updateControls();
 		updateBallMovement();
 		updateCollisionDetection();
+	}
+
+	public function updateProcessGameState() {
+		if (ball.rect.y > 128) {
+			resetGame();
+		}
 	}
 
 	public function updateControls() {
@@ -113,6 +129,7 @@ class MyScene implements Scene {
 			if (isCollided(ball.rect, block) && block.alive) {
 				trace('Collided with block');
 				// ball.rect.y = paddle.y - ball.rect.height;
+				incrementScore();
 				block.alive = false;
 				trace(block.x, block.y);
 				trace(ball.body.velocity.y);
@@ -164,6 +181,11 @@ class MyScene implements Scene {
 		drawBlocks();
 		drawBall();
 		drawPaddle();
+		drawScore();
+	}
+
+	public function drawScore() {
+		txt('white', 'Score: ${score}', 58, 30);
 	}
 
 	public function drawBlocks() {
